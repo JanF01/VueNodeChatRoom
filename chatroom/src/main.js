@@ -1,37 +1,52 @@
 import Vue from "vue";
 import App from "./App.vue";
+import Vuex from "vuex";
+import store from "./store";
 import VueSocketIO from "vue-socket.io";
+import SocketIO from "socket.io-client";
+import Toasted from "vue-toasted";
 
 Vue.config.productionTip = false;
+
+Vue.use(Vuex);
+Vue.use(Toasted);
+
+Vue.prototype.$roomId = "";
+Vue.prototype.$name = "";
+Vue.prototype.$isConnected = false;
+Vue.prototype.$roomMsg = [];
 
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: "http://localhost:3000",
+    connection: SocketIO("http://localhost:3000"),
+    vuex: {
+      store,
+      actionPrefix: "SOCKET_",
+    },
   })
 );
 
+Vue.toasted.register(
+  "chatContent",
+  (payload)=>{
+
+    if (payload.message) {
+      store.state.roomMsg.push(payload.message[payload.message.length-1]);
+      store.state.con = true;
+      return ":)";
+    }
+
+  },
+  {
+    type: "success",
+  }
+);
+
+
+
 new Vue({
-  sockets: {
-    connect() {
-      this.isConnected = true;
-      console.log("Socket connected");
-    },
+  store,
 
-    disconnect() {
-      this.isConnected = false;
-      console.log("server disconnected");
-    },
-
-    messageChannel(data) {
-      this.socketMessage = data;
-    },
-  },
-  data: {
-    roomId: "",
-    name: "",
-    isConnected: false,
-  },
-  methods: {},
   render: (h) => h(App),
 }).$mount("#app");
