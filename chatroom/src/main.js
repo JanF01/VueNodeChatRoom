@@ -16,10 +16,12 @@ Vue.prototype.$name = "";
 Vue.prototype.$isConnected = false;
 Vue.prototype.$roomMsg = [];
 
+export const eventBus = new Vue();
+
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: SocketIO("http://localhost:3000"),
+    connection: SocketIO("http://http://195.181.213.70:3000"),
     vuex: {
       store,
       actionPrefix: "SOCKET_",
@@ -28,25 +30,62 @@ Vue.use(
 );
 
 Vue.toasted.register(
-  "chatContent",
-  (payload)=>{
-
+  "wrongData",
+  (payload) => {
     if (payload.message) {
-      store.state.roomMsg.push(payload.message[payload.message.length-1]);
-      store.state.con = true;
-      return ":)";
+      return "Niedozwolone dane";
     }
-
-  },
-  {
+  }, {
+    type: "warning",
+  }
+);
+Vue.toasted.register(
+  "nameUsed",
+  (payload) => {
+    if (payload.message) {
+      return "   Nazwa pokoju zajęta   ";
+    }
+  }, {
+    type: "warning",
+  }
+);
+Vue.toasted.register(
+  "leftRoom",
+  (payload) => {
+    if (payload.message) {
+      store.state.con = false;
+      return "   Opuszczono pokój   ";
+    }
+  }, {
+    type: "success",
+  }
+);
+Vue.toasted.register(
+  "chatContent",
+  (payload) => {
+    if (payload.message) {
+      store.state.roomMsg.push(payload.message[payload.message.length - 1]);
+      eventBus.$emit("alignBottom");
+      return "   Wiadomość   ";
+    }
+  }, {
+    type: "info",
+  }
+);
+Vue.toasted.register(
+  "serverContent",
+  (payload) => {
+    if (payload.message) {
+      store.state.roomMsg.push(payload.message[payload.message.length - 1]);
+      store.state.con = true;
+      return "Połączenie powiodło się";
+    }
+  }, {
     type: "success",
   }
 );
 
-
-
 new Vue({
   store,
-
   render: (h) => h(App),
 }).$mount("#app");

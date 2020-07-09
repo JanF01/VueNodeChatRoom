@@ -12,8 +12,8 @@
         </div>
       </div>
     </section>
-    <main class="has-text-centered" id="app" v-if="chat.length<1">
-      <div class="field" >
+    <main class="has-text-centered" id="app" v-if="chat.length < 1">
+      <div class="field">
         <div class="control">
           <input
             v-model="$roomId"
@@ -45,21 +45,39 @@
           </button>
         </div>
       </div>
-          
-   
-
     </main>
-     <main class="has-text-centered" id="app" v-if="chat.length>=1">
-        <div class="content">
-         <blockquote v-for="item in chat" :key="item">{{ item }}</blockquote>
-         </div>
-         <div class="field">
-         <p class="control">
-            <input v-model="msg" class="input" type="text" placeholder="Message..." v-on:keyup="sendMessage">
-           </p>
-         </div>
-  
-      </main>
+    <main
+      class="has-text-centered scrol"
+      id="app"
+      v-if="chat.length >= 1"
+      ref="chat"
+    >
+      <aside>
+        <button class="button is-danger" @click="leaveRoom">Disconnect</button>
+        <span class="roomId">{{ this.$roomId }}</span>
+      </aside>
+
+      <div class="content" v-for="(item, index) in chat" :key="index">
+        <blockquote v-if="item.initiator == 'Server'">
+          {{ item.content }}
+        </blockquote>
+
+        <span class="msg" v-if="item.initiator == 'Chat'">
+          {{ item.content }}
+        </span>
+      </div>
+      <div class="field">
+        <p class="control">
+          <input
+            v-model="msg"
+            class="input"
+            type="text"
+            placeholder="Message..."
+            v-on:keyup="sendMessage"
+          />
+        </p>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -70,10 +88,88 @@ body {
   margin: 0 auto;
 }
 
+p.msg {
+  width: 100%;
+  text-align: left;
+  padding-left: 2.5%;
+}
+
 main {
   margin: 0 auto;
   text-align: center;
   width: 60%;
+  min-height: 67vh;
+  max-height: 67vh;
+}
+aside {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+}
+aside > span {
+  display: block;
+  font-size: 1.5em;
+  width: 40em;
+}
+
+@media (max-width: 4000px) {
+  aside {
+    top: 16.5%;
+    left: auto;
+  }
+  aside {
+    flex-direction: row;
+  }
+  aside > span {
+    font-size: 1.2em;
+    bottom: 0em;
+    margin-left: 3%;
+  }
+  aside > button {
+    font-size: 0.85em !important;
+  }
+  main {
+    margin-top: 3%;
+  }
+}
+
+.content {
+  text-align: left;
+}
+.content > span {
+  display: block;
+  padding-left: 2%;
+}
+.content blockquote {
+  text-align: center;
+  border-left-color: #33aacc;
+}
+
+.scrol {
+  max-height: 75vh;
+  padding-bottom: 1%;
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y mandatory;
+}
+
+.scrol > .field > .control > p:last-child {
+}
+
+.scrol::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+}
+
+.scrol::-webkit-scrollbar {
+  width: 10px;
+  background-color: #f5f5f5;
+}
+
+.scrol::-webkit-scrollbar-thumb {
+  background-color: #000000;
+  border: 2px solid #555555;
 }
 
 input {
@@ -87,39 +183,55 @@ input {
 .create {
   margin-left: 2.5%;
 }
-.content blockquote{
- padding-top:1em;
- padding-bottom:1em;
+.content blockquote {
+  padding-top: 1em;
+  padding-bottom: 1em;
 }
-
 </style>
 
 <script>
-import store from './store.js';
-
-
-
+import store from "./store.js";
+import { eventBus } from "./main.js";
 
 export default {
-  data: function(){
+  data: function() {
     return {
-     chat: store.state.roomMsg,
-     msg: '',
+      chat: store.state.roomMsg,
+      msg: "",
     };
+  },
+  created() {
+    eventBus.$on("alignBottom", () => {
+      this.align();
+    });
   },
   methods: {
     joinRoom() {
       this.$socket.emit("join", { room: this.$roomId, name: this.$name });
+      this.chat = store.state.roomMsg;
     },
     createRoom() {
       this.$socket.emit("create", { room: this.$roomId, name: this.$name });
+      this.chat = store.state.roomMsg;
+    },
+    leaveRoom() {
+      this.$socket.emit("leave", { room: this.$roomId, name: this.$name });
+      store.state.roomMsg = [];
+      this.chat = [];
     },
     sendMessage(e) {
-      if(e.keyCode===13){
-      this.$socket.emit("message", { room: this.$roomId, msg: this.msg });
-      this.essa = '';
+      if (e.keyCode === 13) {
+        this.$socket.emit("message", { room: this.$roomId, msg: this.msg });
+        this.msg = "";
+        this.align();
       }
-    }
+    },
+    align() {
+      setTimeout(() => {
+        let scroll = document.getElementsByClassName("scrol");
+        scroll[0].scrollTop = scroll[0].scrollHeight;
+      }, 100);
+    },
   },
 };
 </script>
