@@ -139,10 +139,12 @@ aside > span {
 .content > span {
   display: block;
   padding-left: 2%;
+  word-wrap: break-word;
 }
 .content blockquote {
   text-align: center;
   border-left-color: #33aacc;
+  word-wrap: break-word;
 }
 
 .scrol {
@@ -151,6 +153,7 @@ aside > span {
   overflow-y: scroll;
   overscroll-behavior-y: contain;
   scroll-snap-type: y mandatory;
+  word-wrap: break-word;
 }
 
 .scrol > .field > .control > p:last-child {
