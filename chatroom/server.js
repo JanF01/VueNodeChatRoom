@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
       msg: data.msg,
     });
 
-    if (valid === null) {
+    if (valid.error === null) {
       for (let i = 0; i < emotes.length; i++) {
         data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
       }
