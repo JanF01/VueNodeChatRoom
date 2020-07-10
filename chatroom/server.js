@@ -37,6 +37,13 @@ var schema = new Joi.object({
     .required(),
 });
 
+var schemaMsg = new Joi.object({
+  msg: Joi.string()
+    .min(1)
+    .max(200)
+    .required(),
+});
+
 var rooms = {};
 
 io.on("connection", (socket) => {
@@ -114,14 +121,22 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", (data) => {
-    for (let i = 0; i < emotes.length; i++) {
-      data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
-    }
-    rooms[roomId].data.push({
-      initiator: "Chat",
-      content: name + ": " + emoji.emojify(data.msg),
+    var valid = schemaMsg.validate({
+      msg: data.msg,
     });
-    io.in(roomId).emit("chat", rooms[roomId].data);
+
+    if (valid === null) {
+      for (let i = 0; i < emotes.length; i++) {
+        data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
+      }
+      rooms[roomId].data.push({
+        initiator: "Chat",
+        content: name + ": " + emoji.emojify(data.msg),
+      });
+      io.in(roomId).emit("chat", rooms[roomId].data);
+    } else {
+      socket.emit("wrongData", true);
+    }
   });
 
   socket.on("leave", (data) => {
