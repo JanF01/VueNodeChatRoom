@@ -52,17 +52,20 @@ io.on("connection", (socket) => {
   var name = "";
 
   function leaveRoom() {
+    console.log("User " + name + " left room: " + roomId);
     rooms[roomId].users.splice(rooms[roomId].users.indexOf(socket.id), 1);
     rooms[roomId].data.push({
       initiator: "Server",
       content: "Server: User " + name + " has disconnected",
     });
-    io.in(roomId).emit("chat", rooms[roomId].data);
     socket.leave(roomId);
     if (rooms[roomId].users.length < 1) {
       delete rooms[roomId];
+    } else {
+      io.in(roomId).emit("chat", rooms[roomId].data);
     }
     roomId = "";
+    console.log(rooms);
   }
 
   socket.on("join", (data) => {
@@ -73,9 +76,6 @@ io.on("connection", (socket) => {
         name: data.name,
       });
       if (valid.error === null) {
-        if (roomId != "") {
-          leaveRoom();
-        }
         roomId = data.room;
         name = data.name;
         rooms[roomId].users.push(socket.id);
@@ -99,17 +99,17 @@ io.on("connection", (socket) => {
         name: data.name,
       });
       if (valid.error === null) {
-        console.log(data);
         name = data.name;
         roomId = data.room;
-        rooms[data.room] = {
+        rooms[roomId] = {
           users: [socket.id],
           data: [],
         };
-        rooms[data.room].data.push({
+        rooms[roomId].data.push({
           initiator: "Server",
           content: "Server: " + "User " + data.name + " has connected",
         });
+        console.log(rooms);
         socket.join(data.room);
         io.in(roomId).emit("content", rooms[roomId].data);
       } else {
@@ -144,7 +144,6 @@ io.on("connection", (socket) => {
   socket.on("leave", (data) => {
     if (roomId != "") {
       leaveRoom();
-      socket.emit("left", true);
     }
   });
 
