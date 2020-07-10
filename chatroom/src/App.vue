@@ -99,6 +99,7 @@ main {
   width: 60%;
   min-height: 67vh;
   max-height: 67vh;
+  word-wrap: break-word;
 }
 aside {
   position: absolute;
@@ -135,14 +136,17 @@ aside > span {
 
 .content {
   text-align: left;
+  word-wrap: break-word;
 }
 .content > span {
   display: block;
   padding-left: 2%;
+  width: 100%;
   word-wrap: break-word;
 }
 .content blockquote {
   text-align: center;
+  width: 100%;
   border-left-color: #33aacc;
   word-wrap: break-word;
 }
