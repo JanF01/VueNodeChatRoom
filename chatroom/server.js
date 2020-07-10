@@ -126,22 +126,26 @@ io.on("connection", (socket) => {
     });
 
     if (valid.error === null) {
-      for (let i = 0; i < emotes.length; i++) {
-        data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
+      if (roomId != "") {
+        for (let i = 0; i < emotes.length; i++) {
+          data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
+        }
+        rooms[roomId].data.push({
+          initiator: "Chat",
+          content: name + ": " + emoji.emojify(data.msg),
+        });
+        io.in(roomId).emit("chat", rooms[roomId].data);
       }
-      rooms[roomId].data.push({
-        initiator: "Chat",
-        content: name + ": " + emoji.emojify(data.msg),
-      });
-      io.in(roomId).emit("chat", rooms[roomId].data);
     } else {
       socket.emit("wrongData", true);
     }
   });
 
   socket.on("leave", (data) => {
-    leaveRoom();
-    socket.emit("left", true);
+    if (roomId != "") {
+      leaveRoom();
+      socket.emit("left", true);
+    }
   });
 
   socket.on("disconnect", () => {
