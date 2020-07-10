@@ -1,7 +1,7 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const express = require("express");
 const app = express();
-const emoji = require('node-emoji');
+const emoji = require("node-emoji");
 
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
@@ -15,10 +15,16 @@ http.listen(port);
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
 
-
 var emotes = [":)", ":D", ";(", ":(", "<3", ":P", ":O"];
-var emotes_replace = [":smile:", ":laughing:", ":sob:", ":worried:", ":sparkling_heart:", ":stuck_out_tongue_closed_eyes:", ":astonished:"];
-
+var emotes_replace = [
+  ":smile:",
+  ":laughing:",
+  ":sob:",
+  ":worried:",
+  ":sparkling_heart:",
+  ":stuck_out_tongue_closed_eyes:",
+  ":astonished:",
+];
 
 var schema = new Joi.object({
   room: Joi.string()
@@ -57,7 +63,7 @@ io.on("connection", (socket) => {
     if (roomIndex != false) {
       var valid = schema.validate({
         room: data.room,
-        name: data.name
+        name: data.name,
       });
       if (valid.error === null) {
         if (roomId != "") {
@@ -83,7 +89,7 @@ io.on("connection", (socket) => {
     if (data.room in rooms == false) {
       var valid = schema.validate({
         room: data.room,
-        name: data.name
+        name: data.name,
       });
       if (valid.error === null) {
         console.log(data);
