@@ -46,25 +46,24 @@
         </div>
       </div>
     </main>
-    <main
-      class="has-text-centered scrol"
-      id="app"
-      v-if="chat.length >= 1"
-      ref="chat"
-    >
-      <aside>
-        <button class="button is-danger" @click="leaveRoom">Disconnect</button>
-        <span class="roomId">{{ this.$roomId }}</span>
-      </aside>
+    <main class="has-text-centered" id="app" v-if="chat.length >= 1" ref="chat">
+      <div class="field scrol">
+        <aside>
+          <button class="button is-danger" @click="leaveRoom">
+            Disconnect
+          </button>
+          <span class="roomId">{{ this.$roomId }}</span>
+        </aside>
 
-      <div class="content" v-for="(item, index) in chat" :key="index">
-        <blockquote v-if="item.initiator == 'Server'">
-          {{ item.content }}
-        </blockquote>
+        <div class="content" v-for="(item, index) in chat" :key="index">
+          <blockquote v-if="item.initiator == 'Server'">
+            {{ item.content }}
+          </blockquote>
 
-        <span class="msg" v-if="item.initiator == 'Chat'">
-          {{ item.content }}
-        </span>
+          <span class="msg" v-if="item.initiator == 'Chat'">
+            {{ item.content }}
+          </span>
+        </div>
       </div>
       <div class="field">
         <p class="control">
@@ -147,7 +146,7 @@ aside > span {
 }
 
 .scrol {
-  max-height: 75vh;
+  max-height: 73vh;
   padding-bottom: 1%;
   overflow-y: scroll;
   overscroll-behavior-y: contain;

@@ -18,10 +18,14 @@ Vue.prototype.$roomMsg = [];
 
 export const eventBus = new Vue();
 
+
+
+
+
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: SocketIO("http://http://195.181.213.70:3000"),
+    connection: SocketIO("http://195.181.213.70:3000"),
     vuex: {
       store,
       actionPrefix: "SOCKET_",

@@ -1,10 +1,11 @@
 const Joi = require("joi");
 const express = require("express");
 const app = express();
+const emoji = require('node-emoji');
 
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const port = process.env.port || 3000;
+const port = 3000;
 const http = require("http").Server(app);
 
 const io = require("socket.io")(http);
@@ -13,6 +14,11 @@ http.listen(port);
 
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
+
+
+var emotes = [":)", ":D", ";(", ":(", "<3", ":P", ":O"];
+var emotes_replace = [":smile:", ":laughing:", ":sob:", ":worried:", ":sparkling_heart:", ":stuck_out_tongue_closed_eyes:", ":astonished:"];
+
 
 var schema = new Joi.object({
   room: Joi.string()
@@ -43,12 +49,16 @@ io.on("connection", (socket) => {
     if (rooms[roomId].users.length < 1) {
       delete rooms[roomId];
     }
+    roomId = "";
   }
 
   socket.on("join", (data) => {
     var roomIndex = data.room in rooms;
     if (roomIndex != false) {
-      var valid = schema.validate({ room: data.room, name: data.name });
+      var valid = schema.validate({
+        room: data.room,
+        name: data.name
+      });
       if (valid.error === null) {
         if (roomId != "") {
           leaveRoom();
@@ -71,7 +81,10 @@ io.on("connection", (socket) => {
 
   socket.on("create", (data) => {
     if (data.room in rooms == false) {
-      var valid = schema.validate({ room: data.room, name: data.name });
+      var valid = schema.validate({
+        room: data.room,
+        name: data.name
+      });
       if (valid.error === null) {
         console.log(data);
         name = data.name;
@@ -95,9 +108,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", (data) => {
+    for (let i = 0; i < emotes.length; i++) {
+      data.msg = data.msg.replace(emotes[i], emotes_replace[i]);
+    }
     rooms[roomId].data.push({
       initiator: "Chat",
-      content: name + ": " + data.msg,
+      content: name + ": " + emoji.emojify(data.msg),
     });
     io.in(roomId).emit("chat", rooms[roomId].data);
   });
