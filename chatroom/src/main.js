@@ -25,7 +25,7 @@ export const eventBus = new Vue();
 Vue.use(
   new VueSocketIO({
     debug: true,
-    connection: SocketIO("http://195.181.213.70:3000"),
+    connection: SocketIO("http://localhost:3000"),
     vuex: {
       store,
       actionPrefix: "SOCKET_",
